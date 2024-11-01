@@ -28,10 +28,8 @@ from omni.isaac.lab.controllers import (
 from omni.isaac.lab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_plane
 import math
 from .lift_env_cfg import (
-    # R1LiftCubeEnvCfg,
     R1LiftCubeAbsEnvCfg,
     R1LiftCubeRelEnvCfg,
-    # R1LiftBinEnvCfg,
     R1LiftBinAbsEnvCfg,
     R1LiftBinRelEnvCfg,
     R1MultiFruitAbsEnvCfg,
@@ -48,8 +46,6 @@ class R1MultiFruitEnv(DirectRLEnv):
     #   |-- _reset_idx(env_ids)
 
     cfg: (
-        # R1LiftBinEnvCfg
-        # | R1LiftCubeEnvCfg
         R1LiftCubeAbsEnvCfg
         | R1LiftCubeRelEnvCfg
         | R1LiftBinAbsEnvCfg
@@ -62,8 +58,6 @@ class R1MultiFruitEnv(DirectRLEnv):
     def __init__(
         self,
         cfg: (
-            # R1LiftBinEnvCfg
-            # | R1LiftCubeEnvCfg
             R1LiftCubeAbsEnvCfg
             | R1LiftCubeRelEnvCfg
             | R1LiftBinAbsEnvCfg
@@ -132,7 +126,6 @@ class R1MultiFruitEnv(DirectRLEnv):
 
     def _setup_scene(self):
         self._object = [0]*4 
-        # self._object = []
         self._robot = Articulation(self.cfg.robot_cfg)
         self._drop_height = 0.96
         # add robot, object
@@ -169,7 +162,6 @@ class R1MultiFruitEnv(DirectRLEnv):
 
         # add table which is a static object
         if self.cfg.table_cfg.spawn is not None:
-            # self.cfg.table_cfg.spawn.scale = (0.01, 0.013, 0.0135)
             self.cfg.table_cfg.spawn.scale = (0.09, 0.09, 0.09)
             self.cfg.table_cfg.spawn.func(
                 self.cfg.table_cfg.prim_path,
@@ -193,8 +185,6 @@ class R1MultiFruitEnv(DirectRLEnv):
 
         # add to scene
         self.scene.articulations["robot"] = self._robot
-        # for i in range(len(self._object)):
-        #     self.scene.rigid_objects[f"object{i}"] = self._object[i]      
         self.scene.rigid_objects["object0"] = self._object[0]
         self.scene.rigid_objects["object1"] = self._object[1]
         self.scene.rigid_objects["object2"] = self._object[2]
@@ -304,7 +294,6 @@ class R1MultiFruitEnv(DirectRLEnv):
 
     def _process_joint_value(self):
         joint_pos = self._robot.data.joint_pos.clone()
-        # print("[obs] raw joint_pos: ", joint_pos)
         l_arm_joint_pos = joint_pos[:, self.left_arm_joint_ids]
         r_arm_joint_pos = joint_pos[:, self.right_arm_joint_ids]
         l_gripper_joint_pos = joint_pos[:, self.left_gripper_joint_ids]
@@ -344,7 +333,6 @@ class R1MultiFruitEnv(DirectRLEnv):
             ],
             dim=-1,
         )
-        # print("[obs] processed joint_vel: ", joint_vel)
         return joint_pos, joint_vel
 
     def _get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:

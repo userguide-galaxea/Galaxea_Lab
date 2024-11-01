@@ -73,11 +73,8 @@ from omni.isaac.lab_tasks.utils.parse_cfg import parse_env_cfg
 import os
 import sys
 
-# 获取当前文件的目录
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# 获取上一层目录
 parent_dir = os.path.dirname(current_dir)
-# 将上两层目录添加到 sys.path
 sys.path.append(parent_dir)
 
 from state_machine.pick_n_lift import PickAndLiftSm

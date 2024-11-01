@@ -1,4 +1,4 @@
-![Isaac Lab](docs/source/_static/isaaclab.jpg)
+![Galaxea Lab](docs/source/_static/R1DVT_FRUIT.jpg)
 
 ---
 

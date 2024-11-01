@@ -2,20 +2,6 @@
 # All rights reserved.
 
 
-"""
-Script to run an environment with a pick and lift state machine.
-
-The state machine is implemented in the kernel function `infer_state_machine`.
-It uses the `warp` library to run the state machine in parallel on the GPU.
-
-.. code-block:: bash
-
-    ./isaaclab.sh -p source/standalone/galaxea/state_machine/lift_box.py --num_envs 32
-
-"""
-
-"""Launch Omniverse Toolkit first."""
-
 import argparse
 
 from omni.isaac.lab.app import AppLauncher
@@ -37,11 +23,10 @@ parser.add_argument(
     "--task",
     type=str,
     default="Isaac-R1-Multi-Fruit-IK-Abs-Direct-v0",
-    # default="Isaac-R1-Multi-Cube-IK-Abs-Direct-v0",
     help="Name of the task.",
 )
 parser.add_argument(
-    "--num_envs", type=int, default=5, help="Number of environments to simulate."
+    "--num_envs", type=int, default=1, help="Number of environments to simulate."
 )
 parser.add_argument(
     "--num_demos",
@@ -67,7 +52,7 @@ simulation_app = app_launcher.app
 import torch
 import gymnasium as gym
 
-import omni.isaac.lab_tasks  # noqa: F401
+import omni.isaac.lab_tasks  
 from omni.isaac.lab_tasks.utils.parse_cfg import parse_env_cfg                            
 import os
 import sys
@@ -84,7 +69,7 @@ import numpy as np
 SIM_WARM_UP_STEP = 30
 
 galaxea_datasets = {
-            # 上半身的观测数据，主要是用于操作任务
+
             "/upper_body_observations/rgb_head":[], # bytes, png compressed image
             "/upper_body_observations/rgb_left_hand":[], # bytes, png compressed image
             "/upper_body_observations/rgb_right_hand":[], # bytes, png compressed image
@@ -94,24 +79,23 @@ galaxea_datasets = {
             "/upper_body_observations/left_arm_joint_position":[], # np.array(6)，fp32
             "/upper_body_observations/left_arm_joint_velocity":[], # np.array(6), fp32
             "/upper_body_observations/left_arm_gripper_position":[], # np.array(1), fp32
-            "/upper_body_observations/left_arm_ee_torso_pose":[], # np.array(7), ee相对于torso_link4的位姿, position + quaternion
-            # torque数据待定
+            "/upper_body_observations/left_arm_ee_torso_pose":[], # np.array(7),
+    
             "/upper_body_observations/right_arm_joint_position":[], # np.array(6), fp32
             "/upper_body_observations/right_arm_joint_velocity":[], # np.array(6), fp32
             "/upper_body_observations/right_arm_gripper_position":[], # np.array(6), fp32
             "/upper_body_observations/right_arm_ee_torso_pose":[], # np.array(7), ee pose relative to torso_link4, position + quaternion
-            # 下半身的观测数据，预留给未来全身移动的场景，和移动定位的需求
-            "/lower_body_observations/torso_joint_position":[], # np.array(4) # 4个腰部电机的读数
-            "/lower_body_observations/left_arm_ee_base_pose":[], # np.array(7)  ee相对于底盘base_link的位姿
+
+            "/lower_body_observations/torso_joint_position":[], # np.array(4) 
+            "/lower_body_observations/left_arm_ee_base_pose":[], # np.array(7)  
             "/lower_body_observations/right_arm_ee_base_pose":[], # np.array(7)
-            # 没有对应的控制命令就留空
-            "/upper_body_action_dict/left_arm_gripper_position_cmd":[], # np.array(1)  # 夹爪控制命令
-            "/upper_body_action_dict/left_arm_joint_position_cmd":[], # np.array(6)  # 如果是使用MPC控制器，这个怎么办，是不提供还是？
+            "/upper_body_action_dict/left_arm_gripper_position_cmd":[], # np.array(1)  
+            "/upper_body_action_dict/left_arm_joint_position_cmd":[], # np.array(6)  
             "/upper_body_action_dict/left_arm_ee_torso_pose_cmd":[], # np.array(7)
             "/upper_body_action_dict/right_arm_gripper_position_cmd":[], # np.array(1)
             "/upper_body_action_dict/right_arm_joint_position_cmd":[], # np.array(6)
             "/upper_body_action_dict/right_arm_ee_torso_pose_cmd":[], # np.array(7)
-            # 预留给未来的全身运动
+
             "/lower_body_action_dict/torso_joint_position_cmd":[], # np.array(4)
     }
 
@@ -210,10 +194,7 @@ def main():
             goal_pos = obs["policy"]["goal_pose"][..., :3]
             # generate actions
             actions = sm.generate_actions(env, goal_pos)
-            # print("Actions: {}".format(actions))
             actions_record = actions.cpu().numpy() # fix the actions to save
-            # print(actions_record)
-
             count += 1
 
             # give some time to warm up

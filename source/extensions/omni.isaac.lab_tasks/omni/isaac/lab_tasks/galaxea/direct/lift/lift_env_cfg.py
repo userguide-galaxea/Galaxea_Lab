@@ -232,4 +232,3 @@ class R1MultiFruitAbsEnvCfg(R1LiftCubeAbsEnvCfg):
     banana_cfg = BANANA_CFG.copy()
     basket_cfg = BASKET_CFG.copy()
     table_cfg = TABLE_CFG.copy()
-    # name = "R1-Multi-Fruit-IK-Abs-Direct-v0"

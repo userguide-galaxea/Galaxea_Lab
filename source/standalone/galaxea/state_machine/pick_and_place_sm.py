@@ -42,9 +42,6 @@ class PickSmWaitTime:
     APPROACH_OBJECT = wp.constant(0.5)
     GRASP_OBJECT = wp.constant(0.3)
     LIFT_OBJECT = wp.constant(0.5)
-    APPROACH_WITH_OBJECT = wp.constant(0.5)
-    PUT_DOWN_OBJECT = wp.constant(0.5)
-    RELEASE_OBJECT = wp.constant(0.5)
 
 
 @wp.kernel
@@ -61,82 +58,56 @@ def infer_state_machine(
     gripper_state: wp.array(dtype=float),
     offset: wp.array(dtype=wp.transform),
 ):
-    # retrieve thread id
     tid = wp.tid()
-    # retrieve state machine state
     state = sm_state[tid]
-    # decide next state
     if state == PickSmState.REST:
         des_ee_pose[tid] = ee_pose[tid]
         gripper_state[tid] = GripperState.OPEN
-        # wait for a while
         if sm_wait_time[tid] >= PickSmWaitTime.REST:
-            # move to next state and reset wait time
             sm_state[tid] = PickSmState.APPROACH_ABOVE_OBJECT
             sm_wait_time[tid] = 0.0
     elif state == PickSmState.APPROACH_ABOVE_OBJECT:
         des_ee_pose[tid] = wp.transform_multiply(offset[tid], object_pose[tid])
         gripper_state[tid] = GripperState.OPEN
-        # TODO: error between current and desired ee pose below threshold
-        # wait for a while
         if sm_wait_time[tid] >= PickSmWaitTime.APPROACH_OBJECT:
-            # move to next state and reset wait time
             sm_state[tid] = PickSmState.APPROACH_OBJECT
             sm_wait_time[tid] = 0.0
     elif state == PickSmState.APPROACH_OBJECT:
         des_ee_pose[tid] = object_pose[tid]
-        # des_ee_pose[tid] = wp.transform_multiply(offset[tid], object_pose[tid])
         gripper_state[tid] = GripperState.OPEN
-        # TODO: error between current and desired ee pose below threshold
-        # wait for a while
         if sm_wait_time[tid] >= PickSmWaitTime.APPROACH_OBJECT:
-            # move to next state and reset wait time
             sm_state[tid] = PickSmState.GRASP_OBJECT
             sm_wait_time[tid] = 0.0
     elif state == PickSmState.GRASP_OBJECT:
         des_ee_pose[tid] = object_pose[tid]
-        # des_ee_pose[tid] = wp.transform_multiply(offset[tid], object_pose[tid])
         gripper_state[tid] = GripperState.CLOSE
-        # wait for a while
         if sm_wait_time[tid] >= PickSmWaitTime.GRASP_OBJECT:
-            # move to next state and reset wait time
             sm_state[tid] = PickSmState.LIFT_OBJECT
             sm_wait_time[tid] = 0.0
     elif state == PickSmState.LIFT_OBJECT:
         des_ee_pose[tid] = des_object_pose[tid]
         gripper_state[tid] = GripperState.CLOSE
-        # TODO: error between current and desired ee pose below threshold
-        # wait for a while
         if sm_wait_time[tid] >= PickSmWaitTime.LIFT_OBJECT:
-            # move to next state and reset wait time
             sm_state[tid] = PickSmState.APPROACH_WITH_OBJECT
             sm_wait_time[tid] = 0.0
     elif state == PickSmState.APPROACH_WITH_OBJECT:
         des_ee_pose[tid] = wp.transform_multiply(offset[tid], move_object_pose[tid])
         gripper_state[tid] = GripperState.CLOSE
-        # TODO: error between current and desired ee pose below threshold
-        # wait for a while
         if sm_wait_time[tid] >= PickSmWaitTime.APPROACH_WITH_OBJECT:
-            # move to next state and reset wait time
             sm_state[tid] = PickSmState.PUT_DOWN_OBJECT
             sm_wait_time[tid] = 0.0
     elif state == PickSmState.PUT_DOWN_OBJECT:
         des_ee_pose[tid] = wp.transform_multiply(offset[tid], put_down_object_pose[tid])
         gripper_state[tid] = GripperState.CLOSE
         if sm_wait_time[tid] >= PickSmWaitTime.PUT_DOWN_OBJECT:
-            # move to next state and reset wait time
             sm_state[tid] = PickSmState.RELEASE_OBJECT
             sm_wait_time[tid] = 0.0
     elif state == PickSmState.RELEASE_OBJECT:
         des_ee_pose[tid] = wp.transform_multiply(offset[tid], move_object_pose[tid])
         gripper_state[tid] = GripperState.OPEN
-        # TODO: error between current and desired ee pose below threshold
-        # wait for a while
         if sm_wait_time[tid] >= PickSmWaitTime.RELEASE_OBJECT:
-            # move to next state and reset wait time
             sm_state[tid] = PickSmState.RELEASE_OBJECT
             sm_wait_time[tid] = 0.0        
-    # increment wait time
     sm_wait_time[tid] = sm_wait_time[tid] + dt[tid]
 
 class PickAndPlaceRightArmSm:
@@ -149,7 +120,10 @@ class PickAndPlaceRightArmSm:
     2. APPROACH_ABOVE_OBJECT: The robot moves above the object.
     3. APPROACH_OBJECT: The robot moves to the object.
     4. GRASP_OBJECT: The robot grasps the object.
-    5. LIFT_OBJECT: The robot lifts the object to the desired pose. This is the final state.
+    5. LIFT_OBJECT: The robot lifts the object to the desired intermediate pose1 with the object. 
+    6. APPROACH_WITH_OBJECT: The robot moves to the desired intermediate pose2 with the object.
+    7. PUT_DOWN_OBJECT: The robot puts down the object.
+    8. RELEASE_OBJECT: The robot releases the object.
     """
     def __init__(
         self, task: str, dt: float, num_envs: int, device: torch.device | str = "cpu"
@@ -178,7 +152,6 @@ class PickAndPlaceRightArmSm:
         self.offset = torch.zeros((self.num_envs, 7), device=self.device)
         self.offset[:, 2] = 0.1
         self.offset[:, -1] = 1.0  # warp expects quaternion as (x, y, z, w)
-        # print("[DEBUG] offset: ", self.offset)
         self.set_task_config()
         # convert to warp
         self.sm_dt_wp = wp.from_torch(self.sm_dt, wp.float32)
@@ -243,7 +216,6 @@ class PickAndPlaceRightArmSm:
         )
         # convert transformations back to (w, x, y, z)
         des_ee_pose = self.des_ee_pose[:, [0, 1, 2, 6, 3, 4, 5]]
-        # print("des_ee_pose: ", des_ee_pose)
         # convert to torch
         return torch.cat([des_ee_pose, self.des_gripper_state.unsqueeze(-1)], dim=-1)
     def generate_actions(self, env: gym.Env, goal_pos: torch.Tensor) -> torch.Tensor:
@@ -261,7 +233,6 @@ class PickAndPlaceRightArmSm:
         )
         right_tcp_rest_orientation = right_ee_frame.data.target_quat_w[..., 0, :]
         # -- object frame
-        # object_data = env.unwrapped.scene["object"].data
         object_data = env.unwrapped.scene[f"object{self.object_id}"].data
         object_position = object_data.root_pos_w - env.unwrapped.scene.env_origins
         object_orientation = object_data.root_quat_w
@@ -269,7 +240,6 @@ class PickAndPlaceRightArmSm:
         # -- the grasping poses on object for right grippers
         right_object_offset = torch.zeros_like(object_position)
         # single hand just grasp at the center
-        # right_object_offset[:, 1] = -self.task_offset[1]
         right_object_offset[:, 2] = -0.1
         right_object_position, _ = combine_frame_transforms(
             object_position, object_orientation, right_object_offset
@@ -277,7 +247,6 @@ class PickAndPlaceRightArmSm:
         # -- update right desired position
         right_desired_position = goal_pos.clone()
         # single hand just grasp at the center
-        # right_desired_position[:, 1] -= self.task_offset[1]
         # -- update right desired orientation
         r_orientation_offset_euler = torch.zeros_like(right_object_position)
         r_orientation_offset_euler[:, 0] = object_orientation_yaw #- self.task_offset[5]
@@ -289,10 +258,8 @@ class PickAndPlaceRightArmSm:
         # conver to (z, w, x, y)
         right_desired_orientation = r_orientation_offset_quat[:, [3, 0, 1, 2]]
 
-        # 获取 left_tcp_rest_position 的第一个维度大小
         num_rows = left_tcp_rest_position.size(0)
 
-        # 动态创建一个形状为 (num_rows, 1) 的张量
         additional_tensor = torch.ones((num_rows, 1), device=self.device)
         # left hand always stay at the same position
         left_actions = torch.cat([left_tcp_rest_position, left_tcp_rest_orientation, additional_tensor], dim=-1)
@@ -305,7 +272,6 @@ class PickAndPlaceRightArmSm:
         right_move_object_offset = torch.zeros_like(right_move_position_pos)
         # single hand just grasp at the center
         right_move_object_offset[:, 0] = -0.1
-        # right_object_offset[:, 2] = -self.task_offset[2]
         right_move_position_pos, _ = combine_frame_transforms(
             right_move_position_pos, right_move_orientation, right_move_object_offset
         )
@@ -327,6 +293,5 @@ class PickAndPlaceRightArmSm:
             torch.cat([right_desired_position, right_desired_orientation], dim=-1),
             torch.cat([right_move_position_pos, right_move_orientation], dim=-1),
         )
-        # right_actions = torch.cat([right_tcp_rest_position, right_tcp_rest_orientation, torch.tensor([[1.0]], device=self.device)], dim=-1)
         actions = torch.cat([left_actions, right_actions], dim=-1)
         return actions
