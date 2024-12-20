@@ -13,7 +13,7 @@ from . import agents
 from .lift_env import R1LiftEnv
 from .pick_fruit_env import R1MultiFruitEnv
 from .lift_env_cfg import (
-    # R1LiftCubeEnvCfg,
+    R1LiftCubeEnvCfg,
     R1LiftCubeAbsEnvCfg,
     R1LiftCubeRelEnvCfg,
     # R1LiftBinEnvCfg,
@@ -122,3 +122,5 @@ gym.register(
         # "skrl_cfg_entry_point": f"{agents.__name__}:skrl_ppo_cfg.yaml",
     },
 )
+
+
