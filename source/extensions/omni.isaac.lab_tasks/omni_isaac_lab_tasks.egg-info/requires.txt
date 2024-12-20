@@ -1,0 +1,38 @@
+numpy
+torch==2.2.2
+torchvision>=0.14.1
+protobuf<5.0.0,>=3.20.2
+h5py
+tensorboard
+moviepy
+
+[all]
+stable-baselines3>=2.1
+gym
+rl-games==1.6.1
+skrl>=1.2.0
+rsl-rl@ git+https://github.com/leggedrobotics/rsl_rl.git
+robomimic@ git+https://github.com/ARISE-Initiative/robomimic.git
+
+[rl-games]
+rl-games==1.6.1
+gym
+
+[rl_games]
+rl-games==1.6.1
+gym
+
+[robomimic]
+robomimic@ git+https://github.com/ARISE-Initiative/robomimic.git
+
+[rsl-rl]
+rsl-rl@ git+https://github.com/leggedrobotics/rsl_rl.git
+
+[rsl_rl]
+rsl-rl@ git+https://github.com/leggedrobotics/rsl_rl.git
+
+[sb3]
+stable-baselines3>=2.1
+
+[skrl]
+skrl>=1.2.0

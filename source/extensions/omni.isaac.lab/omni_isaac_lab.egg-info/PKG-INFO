@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: omni-isaac-lab
+Version: 0.19.4
+Summary: Extension providing main framework interfaces and abstractions for robot learning.
+Home-page: https://github.com/isaac-sim/IsaacLab
+Author: Isaac Lab Project Developers
+Maintainer: Isaac Lab Project Developers
+License: BSD-3-Clause
+Keywords: kit,robotics,learning,ai
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Isaac Sim :: 4.0.0
+Classifier: Isaac Sim :: 2023.1.1
+Requires-Python: >=3.10
+Requires-Dist: numpy
+Requires-Dist: torch==2.2.2
+Requires-Dist: prettytable==3.3.0
+Requires-Dist: tensordict
+Requires-Dist: toml
+Requires-Dist: hidapi
+Requires-Dist: gymnasium==0.29.0
+Requires-Dist: trimesh
+Requires-Dist: pyglet<2

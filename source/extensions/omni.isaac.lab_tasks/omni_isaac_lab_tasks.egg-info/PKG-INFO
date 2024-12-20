@@ -1,0 +1,43 @@
+Metadata-Version: 2.1
+Name: omni-isaac-lab_tasks
+Version: 0.7.10
+Summary: Extension containing suite of environments for robot learning.
+Home-page: https://github.com/isaac-sim/IsaacLab
+Author: Isaac Lab Project Developers
+Maintainer: Isaac Lab Project Developers
+Keywords: robotics,rl,il,learning
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Isaac Sim :: 4.0.0
+Classifier: Isaac Sim :: 2023.1.1
+Requires-Python: >=3.10
+Requires-Dist: numpy
+Requires-Dist: torch==2.2.2
+Requires-Dist: torchvision>=0.14.1
+Requires-Dist: protobuf<5.0.0,>=3.20.2
+Requires-Dist: h5py
+Requires-Dist: tensorboard
+Requires-Dist: moviepy
+Provides-Extra: sb3
+Requires-Dist: stable-baselines3>=2.1; extra == "sb3"
+Provides-Extra: skrl
+Requires-Dist: skrl>=1.2.0; extra == "skrl"
+Provides-Extra: rl-games
+Requires-Dist: rl-games==1.6.1; extra == "rl-games"
+Requires-Dist: gym; extra == "rl-games"
+Provides-Extra: rsl-rl
+Requires-Dist: rsl-rl@ git+https://github.com/leggedrobotics/rsl_rl.git ; extra == "rsl-rl"
+Provides-Extra: robomimic
+Requires-Dist: robomimic@ git+https://github.com/ARISE-Initiative/robomimic.git ; extra == "robomimic"
+Provides-Extra: rl-games
+Requires-Dist: rl-games==1.6.1; extra == "rl-games"
+Requires-Dist: gym; extra == "rl-games"
+Provides-Extra: rsl-rl
+Requires-Dist: rsl-rl@ git+https://github.com/leggedrobotics/rsl_rl.git ; extra == "rsl-rl"
+Provides-Extra: all
+Requires-Dist: stable-baselines3>=2.1; extra == "all"
+Requires-Dist: gym; extra == "all"
+Requires-Dist: rl-games==1.6.1; extra == "all"
+Requires-Dist: skrl>=1.2.0; extra == "all"
+Requires-Dist: rsl-rl@ git+https://github.com/leggedrobotics/rsl_rl.git ; extra == "all"
+Requires-Dist: robomimic@ git+https://github.com/ARISE-Initiative/robomimic.git ; extra == "all"
