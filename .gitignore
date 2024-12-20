@@ -1,9 +1,0 @@
-*.pyc
-_isaac_sim
-*.txt
-PKG-INFO
-not-zip-safe
-source/extensions/omni.isaac.lab_assets/data/Robots/Loong/loong.usd
-source/extensions/omni.isaac.lab_assets/data/Props/loong_assets/shelf.usd
-source/extensions/omni.isaac.lab_assets/data/Props/loong_assets/box3.usd
-

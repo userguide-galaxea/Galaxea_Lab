@@ -41,5 +41,3 @@ from .unitree import *
 from .universal_robots import *
 from .galaxea_robots import *
 from .galaxea_assets import *
-from .loong_robots import *
-from .loong_assets import *
